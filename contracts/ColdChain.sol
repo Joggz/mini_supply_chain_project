@@ -1,3 +1,4 @@
+
 pragma solidity >=0.7.0 < 0.9.0;
 
 library CryptoSuite {
@@ -96,7 +97,7 @@ contract ColdChain {
      
     }
 
-    function IssueCertificate(address _issuer, address _prover, string memory _status, uint vaccineBatchId, bytes memory signature) public return (uint){
+    function IssueCertificates(address _issuer, address _prover, string memory _status, uint vaccineBatchId, bytes memory signature) public returns (uint){
         Entity memory issuer = entities[_issuer];
         require(issuer.mode == Mode.ISSUER);
 
@@ -105,8 +106,8 @@ contract ColdChain {
 
         Status status = unMarshalStatus(_status);
 
-        uint id = certificates.length;
-        Certificate memory certificate = Certificate(id, user, prover, signaturem status);
+        uint id = certificateIds.length;
+        Certificate memory certificate = Certificate(id, user, prover, signature, status);
 
         certicateIds.push(certificateIds.length);
         certificates[certificateIds.length - 1] = certificate;
@@ -121,9 +122,9 @@ contract ColdChain {
          bytes32 encodedStatus0 =  keccak256(abi.encodePacked("MANUFATURED"));
           bytes32 encodedStatus1 =  keccak256(abi.encodePacked("STORED"));
            bytes32 encodedStatus2 =  keccak256(abi.encodePacked("DELIVERED"));
-               bytes32 encodedStatus2 =  keccak256(abi.encodePacked("DELIVERED_LOCAL"));
-               bytes32 encodedStatus2 =  keccak256(abi.encodePacked("DELIVERED_INTERNATIONAL"));
-               bytes32 encodedStatus2 =  keccak256(abi.encodePacked("VACCINATED"));
+               bytes32 encodedStatus3 =  keccak256(abi.encodePacked("DELIVERED_LOCAL"));
+               bytes32 encodedStatus4 =  keccak256(abi.encodePacked("DELIVERED_INTERNATIONAL"));
+               bytes32 encodedStatus5 =  keccak256(abi.encodePacked("VACCINATED"));
                
 // MANFACTURED, STORED, DELIVERED,DELIVERED_LOCAL, DELIVERED_INTERNATIONAL, VACCINATED 
 
@@ -136,13 +137,22 @@ contract ColdChain {
            else if(encodedStatus == encodedStatus2) {
                return Status.DELIVERED;
            }
-           else if(encodedStatus == encodedStatus2) {
+           else if(encodedStatus == encodedStatus3) {
                return Status.DELIVERED_LOCAL;
            }
-           else if(encodedStatus == encodedStatus2) {
+           else if(encodedStatus == encodedStatus4) {
                return Status.DELIVERED_INTERNATIONAL;
            }
 
            revert("received invalid certification status");
+    }
+
+    function isMatchingSignature( bytes32 message, uint id, address issuer) public view returns(bool) {
+        Certificate memory cert = certificate[id];
+        require(cert.issuer.id == issuer );
+
+        address recoverSigner = CrptoSuite.recoverSigner(message, cert.signature);
+
+        return recoverSigner == cert.issuer.id;
     }
 }
