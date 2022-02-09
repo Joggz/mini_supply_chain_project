@@ -25,14 +25,14 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
 module.exports = {
   networks: {
     hardhat: {},
-    // rinkeby: {
-    //   url: RINKEBY_URL,
-    //   accounts: [account1, account2],
-    // },
-    // ropsten: {
-    //   url: ROPSTEN_URL,
-    //   accounts: [account1, account2],
-    // },
+    rinkeby: {
+      url: RINKEBY_URL,
+      accounts: [account1, account2],
+    },
+    ropsten: {
+      url: ROPSTEN_URL,
+      accounts: [account1, account2],
+    },
   },
   solidity: {
     version: "0.8.4",
